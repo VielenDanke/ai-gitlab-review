@@ -134,7 +134,7 @@ def get_llm(use_local: bool, model_name: str, model_url: Optional[str] = None):
         params = {
             "model": model_name,
             "temperature": 0.2,
-            "num_ctx": 16384 # modify if needed, context to store memory about, number of tokens
+            "num_ctx": 16384  # modify if needed, context to store memory about, number of tokens
         }
 
         # Add custom base_url if provided (e.g., http://localhost:11434)
@@ -221,14 +221,16 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="GitLab Merge Request Reviewer with LLMs")
 
     # GitLab Args
-    parser.add_argument("--gitlab-url", help="Base URL of GitLab instance")
+    parser.add_argument("--gitlab-url", required=True, help="Base URL of GitLab instance")
     parser.add_argument("--project-id", required=True, help="Project ID or Namespace/Project")
     parser.add_argument("--mr-id", required=True, help="Merge Request IID")
 
     # Model Args
-    parser.add_argument("--local", action="store_true", default=True, help="Use local LLM (Ollama)")
-    parser.add_argument("--model", default="deepseek-r1:32b", help="Model name (e.g., llama3, mistral, gemini-2.5-flash)")
-    parser.add_argument("--model-url", default="http://localhost:11434", help="Base URL for local model (e.g., http://localhost:11434)")
+    parser.add_argument("--local", default=True, help="Use local LLM (Ollama)")
+    parser.add_argument("--model", default="deepseek-r1:32b",
+                        help="Model name (e.g., llama3, mistral, gemini-2.5-flash)")
+    parser.add_argument("--model-url", default="http://localhost:11434",
+                        help="Base URL for local model (e.g., http://localhost:11434)")
 
     args = parser.parse_args()
 
