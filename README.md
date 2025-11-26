@@ -25,3 +25,33 @@ It supports **Local LLMs** (via Ollama/DeepSeek) for privacy and cost-savings, a
    
    ```bash
    pip install argparse requests langchain langchain-core langchain-ollama langchain-google-genai pydantic
+   
+## ⚙️ Environment Setup
+
+Before running the script, ensure you have the necessary API tokens. You can set them as environment variables or enter them interactively when prompted.
+
+### 1. GitLab Access (Required)
+You need a Personal Access Token (PAT) to fetch Merge Request data.
+* **Scope required:** `read_api` or `read_repository`.
+
+```bash
+# Linux/macOS
+export GITLAB_PRIVATE_TOKEN="glpat-xxxxxxxxxxxxxxxxx"
+
+# Windows (PowerShell)
+$env:GITLAB_PRIVATE_TOKEN="glpat-xxxxxxxxxxxxxxxxx"
+```
+
+## 📝 Arguments Description
+
+The script accepts several command-line arguments to configure the GitLab connection, the LLM backend, and file filtering.
+
+| Argument | Required | Default | Description |
+| :--- | :---: | :--- | :--- |
+| `--gitlab-url` | ✅ Yes | *None* | The base URL of your GitLab instance (e.g., `https://gitlab.company.com`). |
+| `--project-id` | ✅ Yes | *None* | The Project ID (integer) or URL-encoded Namespace/Project path. |
+| `--mr-id` | ✅ Yes | *None* | The internal ID (IID) of the Merge Request you want to review. |
+| `--local` | No | `True` | Set to `True` to use local Ollama. Set to `False` to use Google Gemini. |
+| `--model` | No | `deepseek-r1:32b` | The specific model name to use (e.g., `llama3`, `gemini-2.5-flash`). |
+| `--model-url` | No | `http://localhost:11434` | The base URL for the local Ollama API (useful for Docker/remote setups). |
+| `--extensions` | No | `.py .js .ts ...` | Space-separated list of file extensions to include in the review. |
