@@ -144,8 +144,8 @@ def get_llm(use_local: bool, model_name: str, model_url: Optional[str] = None):
 
         return ChatOllama(**params)
     else:
-        print("☁️  Using Google Gemini 1.5 Pro")
-        return ChatGoogleGenerativeAI(model="gemini-1.5-pro", temperature=0.2, convert_system_message_to_human=True)
+        print("☁️  Using Google Gemini 2.5 flash")
+        return ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0.2, convert_system_message_to_human=True)
 
 
 def parse_markdown_response(ai_message) -> ReviewOutcome:
@@ -183,7 +183,8 @@ def run_mr_review(args):
                   "End with:\nFINAL_STATUS: PASSED\nOR\nFINAL_STATUS: FAILED")
     ])
 
-    target_extensions = [".py", ".js", ".ts", ".jsx", ".tsx", ".go", ".java", ".cpp"]
+    # 1. EXTENSIONS LOGIC ADDED HERE
+    target_extensions = [ext.strip() for ext in args.extensions.split(' ')]
 
     print(f"🚀 Starting Review for MR !{args.mr_id} in project {args.project_id}")
 
@@ -231,6 +232,9 @@ if __name__ == "__main__":
                         help="Model name (e.g., llama3, mistral, gemini-2.5-flash)")
     parser.add_argument("--model-url", default="http://localhost:11434",
                         help="Base URL for local model (e.g., http://localhost:11434)")
+
+    parser.add_argument("--extensions", default=".py .js .ts .jsx .tsx .go .java .cpp",
+                        help="Space-separated list of file extensions to filter (e.g. .py .go .js)")
 
     args = parser.parse_args()
 
