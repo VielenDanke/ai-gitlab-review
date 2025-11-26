@@ -16,7 +16,7 @@ It supports **Local LLMs** (via Ollama/DeepSeek) for privacy and cost-savings, a
 
 - **Python 3.9+**
 - **GitLab Access:** A Personal Access Token (PAT) with `read_api` or `read_repository` scope.
-- **Ollama (Local Mode):** If using local models, ensure [Ollama](https://ollama.com/) is installed and running.
+- **Ollama (Local Mode):** If using local models, ensure [Ollama](https://ollama.com/) is installed and running [YouTube Video Instructions](https://www.youtube.com/watch?v=cEv1ucRDoa0).
 
 ## 📦 Installation
 
