@@ -124,6 +124,7 @@ def format_documents_for_context(docs: List[Document]) -> str:
 
 class ReviewOutcome(BaseModel):
     is_ok: bool
+    score: int
     report: str
 
 
@@ -144,24 +145,44 @@ def get_llm(use_local: bool, model_name: str, model_url: Optional[str] = None):
 
         return ChatOllama(**params)
     else:
-        print("☁️  Using Google Gemini 2.5 flash")
+        print("☁️  Using Google Gemini 2.5 Flash")
         return ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0.2, convert_system_message_to_human=True)
 
 
 def parse_markdown_response(ai_message) -> ReviewOutcome:
     text = ai_message.content
+
+    # Extract Status
     match = re.search(r"FINAL_STATUS:\s*(PASSED|FAILED)", text, re.IGNORECASE)
     if match:
         status_str = match.group(1).upper()
         is_ok = (status_str == "PASSED")
-        report_content = text.replace(match.group(0), "").strip()
     else:
+        # Fallback logic
         if "CRITICAL BUG" in text.upper() or "SECURITY VULNERABILITY" in text.upper():
             is_ok = False
         else:
             is_ok = True
-        report_content = text
-    return ReviewOutcome(is_ok=is_ok, report=report_content)
+
+    # Extract Score
+    score = 0
+    score_match = re.search(r"SCORE:\s*(\d+)", text, re.IGNORECASE)
+    if score_match:
+        try:
+            score = int(score_match.group(1))
+        except ValueError:
+            score = 0
+
+    # Clean report content
+    report_content = text
+    if match:
+        report_content = report_content.replace(match.group(0), "")
+    if score_match:
+        report_content = report_content.replace(score_match.group(0), "")
+
+    report_content = report_content.strip()
+
+    return ReviewOutcome(is_ok=is_ok, score=score, report=report_content)
 
 
 def run_mr_review(args):
@@ -180,7 +201,13 @@ def run_mr_review(args):
                   "3. **Code Style/Maintainability** of the new code\n\n"
                   "IMPORTANT: Cite specific filenames and line numbers.\n"
                   "Format as Markdown.\n"
-                  "End with:\nFINAL_STATUS: PASSED\nOR\nFINAL_STATUS: FAILED")
+                  "At the very end of your response, you MUST provide a summary status and a quality score (0-100), where 100 is perfect code and 0 is unusable. Make step of 1.\n"
+                  "Use exactly this format:\n"
+                  "FINAL_STATUS: PASSED\n"
+                  "SCORE: <0-100>\n"
+                  "OR\n"
+                  "FINAL_STATUS: FAILED\n"
+                  "SCORE: <0-100>")
     ])
 
     # 1. EXTENSIONS LOGIC ADDED HERE
@@ -207,11 +234,13 @@ def run_mr_review(args):
     print("🧠 Analyzing MR changes...")
     try:
         result = chain.invoke({"context": mr_context})
-        print(f"\n📢 MR Review Status: {'✅ PASSED' if result.is_ok else '❌ FAILED'}")
+        print(f"\n📢 MR Review Status: {'✅ PASSED' if result.is_ok else '❌ FAILED'} (Score: {result.score}%)")
         print("\n" + "=" * 30 + " REPORT " + "=" * 30 + "\n")
         print(result.report)
 
         with open("mr_review_report.md", "w", encoding='utf-8') as f:
+            f.write(f"Status: {'PASSED' if result.is_ok else 'FAILED'}\n")
+            f.write(f"Score: {result.score}%\n\n")
             f.write(result.report)
 
     except Exception as e:
