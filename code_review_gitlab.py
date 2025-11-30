@@ -199,7 +199,9 @@ def run_mr_review(args):
                   "1. **Bugs introduced by the changes**\n"
                   "2. **Security vulnerabilities**\n"
                   "3. **Code Style/Maintainability** of the new code\n\n"
-                  "IMPORTANT: Cite specific filenames and line numbers.\n"
+                  "IMPORTANT:\n"
+                  "- Cite specific filenames and line numbers.\n"
+                  "- **For every issue identified, you MUST provide a 'Possible Fix' section with a code snippet or solution.**\n\n"
                   "Format as Markdown.\n"
                   "At the very end of your response, you MUST provide a summary status and a quality score (0-100), where 100 is perfect code and 0 is unusable. Make step of 1.\n"
                   "Use exactly this format:\n"
@@ -257,7 +259,7 @@ if __name__ == "__main__":
 
     # Model Args
     parser.add_argument("--local", default=True, help="Use local LLM (Ollama)")
-    parser.add_argument("--model", default="deepseek-r1:32b",
+    parser.add_argument("--model", default="qwen3-coder:30b",
                         help="Model name (e.g., llama3, mistral, gemini-2.5-flash)")
     parser.add_argument("--model-url", default="http://localhost:11434",
                         help="Base URL for local model (e.g., http://localhost:11434)")
